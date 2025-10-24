@@ -4,3 +4,8 @@ Flask>=3.0,<4.0
 Jinja2>=3.1,<4.0
 # Optional data handling (you can remove if not needed)
 pandas>=2.0,<3.0
+# Production WSGI server (required for Azure)
+gunicorn>=21.0
+# Database support
+Flask-SQLAlchemy>=3.0
+Flask-Migrate>=4.0

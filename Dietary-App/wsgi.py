@@ -1,22 +1,11 @@
 import os
-import sqlite
-import shutil3
+import sqlite3
 from app import create_app
 from models import db, User, Resident
 
 application = create_app()
 
-with application.app_context()
-    # Check if we should use the pre-populated database from GitHub
-    source_db = os.path.join(os.path.dirname(__file__), 'app.db')
-    db_uri = application.config['SQLALCHEMY_DATABASE_URI']
-    if db_uri.startswith('sqlite:///'):
-        target_db = db_uri.replace('sqlite:///', '')
-        # If target database doesn't exist or is empty, copy the source
-        if os.path.exists(source_db) and (not os.path.exists(target_db) or os.path.getsize(target_db) < 1000):
-            os.makedirs(os.path.dirname(target_db), exist_ok=True)
-            shutil.copy2(source_db, target_db)
-            print(f'Copied pre-populated database from {source_db} to {target_db}'):
+with application.app_context():
     db.create_all()
     print('Database tables created')
     

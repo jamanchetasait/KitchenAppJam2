@@ -9,3 +9,4 @@ gunicorn>=21.0
 # Database support
 Flask-SQLAlchemy>=3.0
 Flask-Migrate>=4.0
+openai>=1.0.0

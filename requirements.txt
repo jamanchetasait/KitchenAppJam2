@@ -11,4 +11,7 @@ gunicorn~=21.0
 # Database support
 Flask-SQLAlchemy~=3.0
 Flask-Migrate~=4.0
+
+# AI Chatbot
+openai>=1.0.0
 python-dotenv~=1.0

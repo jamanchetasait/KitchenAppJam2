@@ -1158,49 +1158,50 @@ def create_app():
         return redirect(url_for("menu_daily"))
 
 
-    # -------------------- Chatbot API Route --------------------
-@app.route('/api/chatbot', methods=['POST'])
-def chatbot_api():
-    """Handle chatbot requests using OpenAI API"""
-    try:
-        data = request.get_json()
-        user_message = data.get('message', '')
-        
-        if not user_message:
-            return jsonify({'error': 'No message provided'}), 400
-        
-        # Initialize OpenAI client with API key from environment
-        client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-        
-        # Create context about the kitchen management system
-        system_prompt = """You are a helpful AI assistant for a kitchen management system. 
-        You can help with:
-        - Information about residents and their dietary requirements
-        - Menu planning and recipe suggestions
-        - Inventory management questions
-        - General kitchen management advice
-        
-        Be concise, friendly, and helpful. Keep responses under 150 words."""
-        
-        # Call OpenAI API
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message}
-            ],
-            max_tokens=200,
-            temperature=0.7
-        )
-        
-        bot_response = response.choices[0].message.content
-        
-        return jsonify({'response': bot_response})
-    
-    except Exception as e:
-        app.logger.error(f"Chatbot API error: {str(e)}")
-        return jsonify({'error': 'Sorry, I encountered an error. Please try again.'}), 500
 
+    
+            # -------------------- Chatbot API Route --------------------
+    @app.route('/api/chatbot', methods=['POST'])
+    def chatbot_api():
+        """Handle chatbot requests using OpenAI API"""
+        try:
+            data = request.get_json()
+            user_message = data.get('message', '')
+            
+            if not user_message:
+                return jsonify({'error': 'No message provided'}), 400
+            
+            # Initialize OpenAI client with API key from environment
+            client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+            
+            # Create context about the kitchen management system
+            system_prompt = """You are a helpful AI assistant for a kitchen management system. 
+            You can help with:
+            - Information about residents and their dietary requirements
+            - Menu planning and recipe suggestions
+            - Inventory management questions
+            - General kitchen management advice
+            
+            Be concise, friendly, and helpful. Keep responses under 150 words."""
+            
+            # Call OpenAI API
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_message}
+                ],
+                max_tokens=200,
+                temperature=0.7
+            )
+            
+            bot_response = response.choices[0].message.content
+            
+            return jsonify({'response': bot_response})
+        
+        except Exception as e:
+            app.logger.error(f"Chatbot API error: {str(e)}")
+        return jsonify({'error': 'Sorry, I encountered an error. Please try again.'}), 500
 
 
     # ---------------- end of routes ----------------

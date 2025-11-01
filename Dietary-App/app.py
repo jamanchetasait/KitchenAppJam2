@@ -1157,55 +1157,6 @@ def create_app():
 
     # ---------------- end of routes ----------------
     return app
-
-# =============== ChatBot API Route ===============
-@app.route('/api/chat', methods=['POST'])
-def chat_api():
-    try:
-        import openai
-        import os
-        
-        data = request.get_json()
-        user_message = data.get('message', '')
-        conversation_history = data.get('history', [])
-        
-        # Get OpenAI API key from environment
-        openai_api_key = os.getenv('OPENAI_API_KEY')
-        
-        if not openai_api_key:
-            return jsonify({'error': 'OpenAI API key not configured'}), 500
-        
-        # Initialize OpenAI client
-        client = openai.OpenAI(api_key=openai_api_key)
-        
-        # Prepare messages for OpenAI
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant for LIN TECH Kitchen Management System. Help users with questions about menu planning, inventory, residents, and kitchen operations."}
-        ]
-        
-        # Add conversation history
-        for msg in conversation_history[-10:]:  # Keep last 10 messages
-            messages.append(msg)
-        
-        # Call OpenAI API
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=messages,
-            max_tokens=500,
-            temperature=0.7
-        )
-        
-        assistant_message = response.choices[0].message.content
-        
-        return jsonify({'response': assistant_message})
-        
-    except ImportError:
-        return jsonify({'error': 'OpenAI package not installed. Please install with: pip install openai'}), 500
-    except Exception as e:
-        print(f"Chat API error: {str(e)}")
-        return jsonify({'error': 'Failed to process chat request'}), 500
-
-
 # -------------------------- dev entrypoint --------------------------
 if __name__ == "__main__":
     app = create_app()

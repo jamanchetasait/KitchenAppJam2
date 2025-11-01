@@ -1173,9 +1173,8 @@ def create_app():
                 return jsonify({'error': 'OpenAI API key not configured'}), 500
             
             # OpenAI API call
-            import openai
-            openai.api_key = openai_api_key
-            
+from openai import OpenAI
+        client = OpenAI(api_key=openai_api_key)            
             # Create messages for OpenAI
             messages = [
                 {"role": "system", "content": "You are a helpful kitchen management assistant. Help users with meal planning, inventory management, dietary restrictions, and kitchen operations."}
@@ -1184,8 +1183,7 @@ def create_app():
             messages.append({"role": "user", "content": user_message})
             
             # Call OpenAI API
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+        response = client.chat.completions.create(                model="gpt-3.5-turbo",
                 messages=messages,
                 max_tokens=500,
                 temperature=0.7

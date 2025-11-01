@@ -1156,6 +1156,46 @@ def create_app():
         return redirect(url_for("menu_daily"))
 
     # ---------------- end of routes ----------------
+
+    # ---------- AI Chatbot API route ----------
+    @app.route('/api/chat', methods=['POST'])
+    def chat():
+        import os
+        try:
+            data = request.get_json()
+            user_message = data.get('message', '')
+            history = data.get('history', [])
+            
+            # Get OpenAI API key from environment
+            openai_api_key = os.getenv('OPENAI_API_KEY')
+            
+            if not openai_api_key:
+                return jsonify({'error': 'OpenAI API key not configured'}), 500
+            
+            # OpenAI API call
+            import openai
+            openai.api_key = openai_api_key
+            
+            # Create messages for OpenAI
+            messages = [
+                {"role": "system", "content": "You are a helpful kitchen management assistant. Help users with meal planning, inventory management, dietary restrictions, and kitchen operations."}
+            ]
+            messages.extend(history)
+            messages.append({"role": "user", "content": user_message})
+            
+            # Call OpenAI API
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=messages,
+                max_tokens=500,
+                temperature=0.7
+            )
+            
+            bot_response = response.choices[0].message.content
+            
+            return jsonify({'response': bot_response})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
     return app
 # -------------------------- dev entrypoint --------------------------
 if __name__ == "__main__":

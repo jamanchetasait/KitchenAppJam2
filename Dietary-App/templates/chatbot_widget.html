@@ -1,0 +1,274 @@
+<!-- AI Chatbot Widget -->
+<style>
+    #chatbot-widget {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 350px;
+        max-height: 500px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        z-index: 1000;
+        transition: all 0.3s ease;
+    }
+    
+    #chatbot-widget.minimized {
+        max-height: 60px;
+    }
+    
+    #chatbot-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    #chatbot-header h3 {
+        margin: 0;
+        font-size: 16px;
+    }
+    
+    #chatbot-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        background: #f5f5f5;
+        max-height: 350px;
+    }
+    
+    .message {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 8px;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+    
+    .user-message {
+        background: #667eea;
+        color: white;
+        margin-left: auto;
+        text-align: right;
+    }
+    
+    .bot-message {
+        background: white;
+        color: #333;
+    }
+    
+    #chatbot-input-area {
+        padding: 15px;
+        border-top: 1px solid #ddd;
+        display: flex;
+        gap: 10px;
+    }
+    
+    #chatbot-input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        outline: none;
+    }
+    
+    #chatbot-send {
+        padding: 10px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    
+    #chatbot-send:hover {
+        background: #5568d3;
+    }
+    
+    #chatbot-toggle {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 999;
+    }
+    
+    #chatbot-toggle svg {
+        width: 30px;
+        height: 30px;
+        fill: white;
+    }
+    
+    .typing-indicator {
+        display: flex;
+        gap: 5px;
+        padding: 10px;
+    }
+    
+    .typing-indicator span {
+        width: 8px;
+        height: 8px;
+        background: #999;
+        border-radius: 50%;
+        animation: typing 1.4s infinite;
+    }
+    
+    .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+    
+    @keyframes typing {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-10px); }
+    }
+</style>
+
+<div id="chatbot-toggle" onclick="toggleChatbot()">
+    <svg viewBox="0 0 24 24">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+    </svg>
+</div>
+
+<div id="chatbot-widget" style="display: none;">
+    <div id="chatbot-header" onclick="minimizeChatbot()">
+        <h3>AI Assistant</h3>
+        <span id="minimize-icon">_</span>
+    </div>
+    <div id="chatbot-messages">
+        <div class="message bot-message">Hello! I'm your AI assistant. How can I help you today?</div>
+    </div>
+    <div id="chatbot-input-area">
+        <input type="text" id="chatbot-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+        <button id="chatbot-send" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+let chatbotOpen = false;
+let chatbotMinimized = false;
+let conversationHistory = [];
+
+function toggleChatbot() {
+    const widget = document.getElementById('chatbot-widget');
+    const toggle = document.getElementById('chatbot-toggle');
+    
+    chatbotOpen = !chatbotOpen;
+    
+    if (chatbotOpen) {
+        widget.style.display = 'flex';
+        toggle.style.display = 'none';
+        chatbotMinimized = false;
+    } else {
+        widget.style.display = 'none';
+        toggle.style.display = 'flex';
+    }
+}
+
+function minimizeChatbot() {
+    const widget = document.getElementById('chatbot-widget');
+    chatbotMinimized = !chatbotMinimized;
+    
+    if (chatbotMinimized) {
+        widget.classList.add('minimized');
+    } else {
+        widget.classList.remove('minimized');
+    }
+}
+
+function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+
+async function sendMessage() {
+    const input = document.getElementById('chatbot-input');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    // Add user message to chat
+    addMessage(message, 'user');
+    input.value = '';
+    
+    // Add to conversation history
+    conversationHistory.push({ role: 'user', content: message });
+    
+    // Show typing indicator
+    showTypingIndicator();
+    
+    try {
+        // Send to backend API
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: message,
+                history: conversationHistory
+            })
+        });
+        
+        const data = await response.json();
+        
+        // Remove typing indicator
+        removeTypingIndicator();
+        
+        if (data.response) {
+            addMessage(data.response, 'bot');
+            conversationHistory.push({ role: 'assistant', content: data.response });
+        } else {
+            addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+        }
+    } catch (error) {
+        removeTypingIndicator();
+        addMessage('Sorry, I\'m having trouble connecting. Please try again later.', 'bot');
+        console.error('Chat error:', error);
+    }
+}
+
+function addMessage(text, type) {
+    const messagesDiv = document.getElementById('chatbot-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}-message`;
+    messageDiv.textContent = text;
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function showTypingIndicator() {
+    const messagesDiv = document.getElementById('chatbot-messages');
+    const typingDiv = document.createElement('div');
+    typingDiv.id = 'typing-indicator';
+    typingDiv.className = 'message bot-message typing-indicator';
+    typingDiv.innerHTML = '<span></span><span></span><span></span>';
+    messagesDiv.appendChild(typingDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const typingDiv = document.getElementById('typing-indicator');
+    if (typingDiv) {
+        typingDiv.remove();
+    }
+}
+</script>

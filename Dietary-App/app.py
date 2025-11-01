@@ -6,6 +6,7 @@ import os, io, csv
 from functools import wraps
 from datetime import datetime, timedelta, date
 from collections import defaultdict
+from openai import OpenAI
 
 from flask import (
     Flask, render_template, request, redirect, url_for,
@@ -1173,8 +1174,7 @@ def create_app():
                 return jsonify({'error': 'OpenAI API key not configured'}), 500
             
             # OpenAI API call
-from openai import OpenAI
-        client = OpenAI(api_key=openai_api_key)            
+pi_key=openai_api_key)            
             # Create messages for OpenAI
             messages = [
                 {"role": "system", "content": "You are a helpful kitchen management assistant. Help users with meal planning, inventory management, dietary restrictions, and kitchen operations."}

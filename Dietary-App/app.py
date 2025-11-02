@@ -1173,8 +1173,8 @@ def create_app():
             if not openai_api_key:
                 return jsonify({'error': 'OpenAI API key not configured'}), 500
             
-            # OpenAI API call
-        client = OpenAI(api_key=openai_api_key)
+                    # OpenAI API call
+                client = OpenAI(api_key=openai_api_key)
             # Create messages for OpenAI
             messages = [
                 {"role": "system", "content": "You are a helpful kitchen management assistant. Help users with meal planning, inventory management, dietary restrictions, and kitchen operations."}

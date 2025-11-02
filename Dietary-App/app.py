@@ -1,5 +1,4 @@
 # app.py — Full app with Menu Builder, Scheduler, Legacy daily page (/menu/legacy),
-# Updated deployment
 # Inventory, Residents, Staff, Dashboard, and strong pre-checks before deductions.
 # Weekly grid FIX: days objects now include {"dow", "date"} to match planned_menu_week.html.
 
